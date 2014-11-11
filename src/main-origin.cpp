@@ -13,11 +13,11 @@
   Last Updated : 1010, 2014, Kevin C. Wang
  ===============================================================*/
 #include "FlyWin32.h"
-#include "camera.h"
+
 
 VIEWPORTid vID;                 // the major viewport
 SCENEid sID;                    // the 3D scene
-OBJECTid cID, tID, oID;              // the main camera and the terrain for terrain following
+OBJECTid cID, tID;              // the main camera and the terrain for terrain following
 CHARACTERid actorID;            // the major character
 ACTIONid idleID, runID, curPoseID; // two actions
 ROOMid terrainRoomID = FAILED_ID;
@@ -25,9 +25,6 @@ TEXTid textID = FAILED_ID;
 
 BOOL4 DIR_KEYDOWN[4] = {FALSE, FALSE, FALSE, FALSE};
 BOOL4 first_switch_action = FALSE;
-BOOL4 hit_test = TRUE;
-float cam_disp[2];
-float actor_height;
 
 char dbg_msgS[256];
 
@@ -50,8 +47,6 @@ void InitMove(int, int);
 void MoveCam(int, int);
 void InitZoom(int, int);
 void ZoomCam(int, int);
-
-
 
 /*------------------
   the main program
@@ -88,7 +83,7 @@ void FyMain(int argc, char **argv)
    FnObject terrain;
    terrain.ID(tID);
    BOOL beOK1 = terrain.Load("terrain");
-   terrain.Show(TRUE);
+   terrain.Show(FALSE);
 
    // set terrain environment
    terrainRoomID = scene.CreateRoom(SIMPLE_ROOM, 10);
@@ -106,14 +101,14 @@ void FyMain(int argc, char **argv)
    float pos[3], fDir[3], uDir[3];
    FnCharacter actor;
    actor.ID(actorID);
-   actor_height = 100.0f;
    pos[0] = 3569.0f; pos[1] = -3208.0f; pos[2] = 1000.0f;
-   fDir[0] = 1.0f; fDir[1] = 0.0f; fDir[2] = 0.0f;
+   fDir[0] = 1.0f; fDir[1] = 1.0f; fDir[2] = 0.0f;
    uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
    actor.SetDirection(fDir, uDir);
 
    actor.SetTerrainRoom(terrainRoomID, 10.0f);
    beOK = actor.PutOnTerrain(pos);
+
    // Get two character actions pre-defined at Lyubu2
    idleID = actor.GetBodyAction(NULL, "Idle");
    runID = actor.GetBodyAction(NULL, "Run");
@@ -122,31 +117,22 @@ void FyMain(int argc, char **argv)
    curPoseID = idleID;
    actor.SetCurrentAction(NULL, 0, curPoseID);
    actor.Play(START, 0.0f, FALSE, TRUE);
-   actor.TurnRight(-90.0f);
+   actor.TurnRight(90.0f);
 
-   // translate the camera, [0] = radius, [1] = angle in degree
-   cam_disp[0] = 500.0f; cam_disp[1] = 10.0f;
+   // translate the camera
    cID = scene.CreateObject(CAMERA);
-   oID = scene.CreateObject(OBJECT);
-   room.AddObject(oID); // add to room
    FnCamera camera;
    camera.ID(cID);
    camera.SetNearPlane(5.0f);
    camera.SetFarPlane(100000.0f);
-   camera.SetParent(oID);
 
-   // Setting camera initial position and orientation
-   // by using dummy character
-   // Set camera in local configuration
-   pos[0] = 0.0f; pos[1] = 0.0f; pos[2] = 0.0f;
-   fDir[0] = 1.0f; fDir[1] = 0.0f; fDir[2] = 0.0f;
-   uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
+   // set camera initial position and orientation
+   pos[0] = 4315.783f; pos[1] = -3199.686f; pos[2] = 93.046f;
+   fDir[0] = -0.983f; fDir[1] = -0.143f; fDir[2] = -0.119f;
+   uDir[0] = -0.116f; uDir[1] = -0.031f; uDir[2] = 0.993f;
+   camera.SetPosition(pos);
+   camera.SetDirection(fDir, uDir);
 
-   FnObject dummyObj;
-   dummyObj.ID(oID);
-   dummyObj.SetPosition(pos);
-   dummyObj.SetDirection(fDir, uDir);
-   
    // setup a point light
    FnLight lgt;
    lgt.ID(scene.CreateObject(LIGHT));
@@ -184,12 +170,12 @@ void FyMain(int argc, char **argv)
  --------------------------------------------------------------*/
 void GameAI(int skip)
 {
-
    FnCharacter actor;
    actor.ID(actorID);
 
    // play character pose
    actor.Play(LOOP, (float) skip, FALSE, TRUE);
+   // Homework #01 part 1
 
    // Run forward/backward
    if(DIR_KEYDOWN[0]) {
@@ -205,7 +191,6 @@ void GameAI(int skip)
 	   actor.TurnRight(-2.0f);
    }
 
-   moveCamera(1, tID, cID, oID, actorID, actor_height, cam_disp, &hit_test);
 }
 
 
@@ -223,9 +208,7 @@ void RenderIt(int skip)
 
    // get camera's data
    FnCamera camera;
-   FnObject dummy;
    camera.ID(cID);
-   dummy.ID(oID);
 
    float pos[3], fDir[3], uDir[3];
    camera.GetPosition(pos);
@@ -255,18 +238,12 @@ void RenderIt(int skip)
    text.Begin(vID);
    text.Write(string, 20, 20, 255, 0, 0);
 
-   char poseS[256], posS[256], fDirS[256], uDirS[256], keyS[256], dummyPosS[256], dummyFDirS[256], dummyHitS[256];
+   char poseS[256], posS[256], fDirS[256], uDirS[256], keyS[256];
    sprintf(posS, "pos: %8.3f %8.3f %8.3f", pos[0], pos[1], pos[2]);
    sprintf(fDirS, "facing: %8.3f %8.3f %8.3f", fDir[0], fDir[1], fDir[2]);
    sprintf(uDirS, "up: %8.3f %8.3f %8.3f", uDir[0], uDir[1], uDir[2]);
    sprintf(keyS, "up: %d, down:%d, left: %d, right, %d", DIR_KEYDOWN[0], DIR_KEYDOWN[1], DIR_KEYDOWN[2], DIR_KEYDOWN[3]);
    sprintf(poseS, "pose: %s", ((curPoseID==runID)? "RUN" : "IDLE"));
-   dummy.GetPosition(pos);
-   dummy.GetDirection(fDir, uDir);
-   sprintf(dummyPosS,  "dummy pos : %8.3f %8.3f %8.3f", pos[0], pos[1], pos[2]);
-   sprintf(dummyFDirS, "dummy fDir: %8.3f %8.3f %8.3f", fDir[0], fDir[1], fDir[2]);
-   sprintf(dummyHitS, "dummy HitTest: %s", (hit_test == TRUE) ? "YES" : "NO");
-
 
    text.Write(posS, 20, 35, 255, 255, 0);
    text.Write(fDirS, 20, 50, 255, 255, 0);
@@ -274,9 +251,6 @@ void RenderIt(int skip)
    text.Write(keyS, 20, 80, 255, 255, 0);
    text.Write(dbg_msgS, 20, 95, 255, 255, 0);
    text.Write(poseS, 20, 110, 255, 255, 0);
-   text.Write(dummyPosS, 20, 125, 255, 255, 0);
-   text.Write(dummyFDirS, 20, 140, 255, 255, 0);
-   text.Write(dummyHitS, 20, 155, 255, 255, 0);
 
    text.End();
 
@@ -293,7 +267,8 @@ void Movement(BYTE code, BOOL4 value) {
 	FnCharacter actor;
 	BOOL4 *HOTKEY;
 	BOOL4 detected = TRUE;
-
+   // Homework #01 part 2
+   // ....
 	actor.ID(actorID);
 	switch(code) {
 		case FY_UP:
