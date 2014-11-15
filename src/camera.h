@@ -1,6 +1,6 @@
 #include "FlyWin32.h"
 #define _USE_MATH_DEFINES
-#include <cmath>
+#include <math.h>
 // camera
 // [action]
 // 0 : do nothing
