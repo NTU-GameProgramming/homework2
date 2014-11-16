@@ -22,6 +22,8 @@ void Camera::initialize(const SCENEid &scene_id, const ROOMid &terrian_room_id, 
 	camera.SetFarPlane(100000.0f);
 	camera.SetParent(camera_base_id);
 
+
+
 	cam_disp_polar[0] = 500.0f; cam_disp_polar[1] = 10.0f;
 	cam_disp_cart[0] = cam_disp_polar[0] * cos(cam_disp_polar[1] * M_PI / 180.0);
 	cam_disp_cart[1] = cam_disp_polar[0] * sin(cam_disp_polar[1] * M_PI / 180.0);
@@ -42,6 +44,8 @@ void Camera::resetCamera() {
 	camera_base.SetPosition(pos);
 	camera_base.SetDirection(fDir, uDir);
 
+	camera.SetDirection(fDir, uDir);
+
 	// move to displaced position
 	camera_base.MoveForward(-cam_disp_cart[0]);
 
@@ -49,9 +53,9 @@ void Camera::resetCamera() {
 	camera_base.GetPosition(pos_camera);
 	pos_camera[2] = pos[2] + cam_disp_cart[1];
 	fDir[0] = pos[0] - pos_camera[0]; fDir[1] = pos[1] - pos_camera[1]; fDir[2] = pos[2] - pos_camera[2];
+	camera.SetPosition(pos_camera);
 	camera.SetDirection(NULL, uDir);
 	camera.SetDirection(fDir, NULL);
-	camera.SetPosition(pos_camera);
 }
 
 void Camera::GameAIupdate(int skip) {
