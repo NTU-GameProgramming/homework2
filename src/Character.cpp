@@ -12,7 +12,7 @@ Character::~Character(void)
 {
 }
 
-void Character::initialize(const SCENEid &sceneId, const OBJECTid &dummyCameraId, const ROOMid &terrianRoomId){
+void Character::initialize(const SCENEid &sceneId, const OBJECTid &dummyCameraId, const ROOMid &terrianRoomId){ 
 	m_sceneId = sceneId;
 	m_dummyCameraId = dummyCameraId;
 	m_terrianRoomId = terrianRoomId;

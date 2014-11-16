@@ -50,7 +50,7 @@ public:
 		for(int i = 0; i < size; ++i){
 		vec[i] = vec[i]/fSquareSum;
 		}
-	 }
+	 } 
 
 	 void getPositionDist2D(float *vec1, float *vec2, float &dst){
 		 float fDiff[2];
