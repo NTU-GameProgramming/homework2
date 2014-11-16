@@ -3,7 +3,7 @@
 #include <math.h>
 
 
-class Camera : Object {
+class Camera : FnCamera {
 	public:
 		Camera(void);
 
