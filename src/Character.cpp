@@ -188,6 +188,6 @@ int Character::update(int skip){
 	m_preState = m_curState;
 	m_actor.GetPosition(m_fPos3);
 	m_actor.GetDirection(m_fDir3, m_uDir3);
-
+	collision = success;
 	return success;
 }

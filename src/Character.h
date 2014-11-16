@@ -60,7 +60,7 @@ public:
 		dst = std::sqrt(fSquareDst);
 	 }
 
-	 void getDstDirection(float *srcFDir, float *srcUDir, float *dstDir, MotionState state){
+	 void getDstDirection(float *srcFDir, float *srcUDir, float *dstDir, MotionState state){ //得到目標位置的向量
 		  float leftDir[3];
 		  float rightDir[3];
 		 switch(state){
@@ -138,14 +138,14 @@ public:
 
 	~Character(void);
 
-	void initialize(const SCENEid &sceneId, const OBJECTid &dummyCameraId, const ROOMid &terrianRoomId);
+	void initialize(const SCENEid &sceneId, const OBJECTid &dummyCameraId, const ROOMid &terrianRoomId);  //dummyCameraId 輸入camera的ID
 	
-	int update(int skip);
+	int update(int skip); //在gameAI時，更新人物動作 return 是否碰撞
 
 	CHARACTERid getCharacterId(){
 		return m_actorId;
 	}
-
+	int collision; //人物是否碰撞中
 private:
 	float getNewRotateAngle();
 

@@ -121,9 +121,10 @@ void FyMain(int argc, char **argv)
    pos[0] = 0.0f; pos[1] = 0.0f; pos[2] = 0.0f;
    fDir[0] = 1.0f; fDir[1] = 0.0f; fDir[2] = 0.0f;
    uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
+   //camera的座標
 
 
-   actor.initialize(sceneID, cameraID, terrainRoomID);
+   actor.initialize(sceneID, cameraID, terrainRoomID);  //初始化人物 
    actorID = actor.getCharacterId();
    actor_height = 100.0f;
 
@@ -168,10 +169,8 @@ void FyMain(int argc, char **argv)
  --------------------------------------------------------------*/
 void GameAI(int skip)
 {
-   
-
+   actor.update(skip);  //人物狀態的更新
    moveCamera(1, terrainID, cameraID, cameraBaseID, actorID, actor_height, cam_disp, &hit_test);
-   actor.update(skip);
 }
 
 void RenderIt(int skip){
