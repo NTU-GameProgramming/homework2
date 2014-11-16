@@ -3,22 +3,29 @@
 #include <math.h>
 
 
-class Camera : FnCamera {
+class Camera {
 	public:
-		Camera(void);
+		Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id);
 
-		!Camera(void);
-
-		void initialize(actorID,sceneId,terrianRoomId);
+		~Camera(void);
 
 		void GameAIupdate(int skip);
 
-		Cameraid getCameraId(){
-			return cameraId;
+		OBJECTid getCameraId(){
+			return camera_id;
+		}
+
+		OBJECTid getCameraBaseId(){
+			return camera_base_id;
 		}
 
 	private:
-		everyID..... ;
+		SCENEid scene_id;
+		OBJECTid camera_id, camera_base_id;
+		ROOMid terrian_room_id;
+		FnCamera camera;
+		FnObject camera_base;
+		float cam_disp[2]; // displacement radius and lifted angle in degree
 }
 
 // camera

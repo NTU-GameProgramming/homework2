@@ -170,7 +170,7 @@ void FyMain(int argc, char **argv)
 void GameAI(int skip)
 {
    actor.update(skip);  //人物狀態的更新
-   moveCamera(1, terrainID, cameraID, cameraBaseID, actorID, actor_height, cam_disp, &hit_test);
+   moveCamera(1, terrainID, cameraID, cameraBaseID, actorID, actor_height, cam_disp, &hit_test); // Camera狀態的更新
 }
 
 void RenderIt(int skip){
