@@ -2,7 +2,7 @@
 #include <map>
 #include <FlyWin32.h>
 #include "Character.h"
-#include "camera.h"
+#include "Camera.h"
 
 VIEWPORTid viewportID;	//major viewe port
 SCENEid sceneID;	//3d scene
