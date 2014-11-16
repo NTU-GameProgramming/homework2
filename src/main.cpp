@@ -13,13 +13,11 @@ ACTIONid idleID, runID, curPoseID;
 ROOMid terrainRoomID = FAILED_ID;
 TEXTid textID = FAILED_ID;
 Character actor;
+Camera camera;
 
 
 BOOL4 DIR_KEYDOWN[4] = {FALSE, FALSE, FALSE, FALSE};
 BOOL4 first_switch_action = FALSE;
-BOOL4 hit_test = TRUE;
-float cam_disp[2];
-float actor_height;
 
 char dbg_msgS[256];
 
@@ -98,35 +96,23 @@ void FyMain(int argc, char **argv)
 	pos[0] = 3000, pos[1] = -3208; pos[2] = 0;
 	fDir[0] = 1, fDir[1] = 0; fDir[2] = 0;
 	uDir[0] = 0, uDir[1] = 0, uDir[2] = 1;
-   cameraBaseID = scene.CreateObject(OBJECT);
-   FnObject cameraBase;
-   cameraBase.ID(cameraBaseID);
-   cameraBase.SetPosition(pos);
-   cameraBase.SetDirection(fDir, uDir);
 
 
-   // translate the camera, [0] = radius, [1] = angle in degree
-   cam_disp[0] = 500.0f; cam_disp[1] = 10.0f;
-   cameraID = scene.CreateObject(CAMERA);
-   //room.AddObject(cameraBaseID); // add to room
-   FnCamera camera;
-   camera.ID(cameraID);
-   camera.SetNearPlane(5.0f);
-   camera.SetFarPlane(100000.0f);
-   camera.SetParent(cameraBaseID);
+	//初始化人物 注意cameraID要重設
+	actor.initialize(sceneID, NULL, terrainRoomID);
+	actorID = actor.getCharacterId();
 
-   // Setting camera initial position and orientation
-   // by using dummy character
-   // Set camera in local configuration
-   pos[0] = 0.0f; pos[1] = 0.0f; pos[2] = 0.0f;
-   fDir[0] = 1.0f; fDir[1] = 0.0f; fDir[2] = 0.0f;
-   uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
-   //camera的座標
+	//初始化攝影機
+	camera.initialize(sceneID, terrainRoomID, &actor);
+	cameraID = camera.getCameraId();
+	cameraBaseID = camera.getCameraBaseId();
 
+	//重設人物的cameraID
+	actor.setBaseCameraId(cameraID);
 
-   actor.initialize(sceneID, cameraID, terrainRoomID);  //初始化人物 
-   actorID = actor.getCharacterId();
-   actor_height = 100.0f;
+	//放好相機
+	camera.resetCamera();
+
 
    // setup a point light
    /*
@@ -169,16 +155,14 @@ void FyMain(int argc, char **argv)
  --------------------------------------------------------------*/
 void GameAI(int skip)
 {
-   actor.update(skip);  //人物狀態的更新
-   moveCamera(1, terrainID, cameraID, cameraBaseID, actorID, actor_height, cam_disp, &hit_test); // Camera狀態的更新
+    actor.update(skip);  //人物狀態的更新
+   //Camera狀態的更新
+	camera.resetCamera();
 }
 
 void RenderIt(int skip){
-	FnCharacter actor;
-	actor.ID(actorID);
 	float pos[3], fDir[3], uDir[3];
-	actor.GetPosition(pos, FALSE);
-	actor.GetDirection(fDir, uDir);
+
 
 	FnViewport vp;
 
@@ -186,16 +170,8 @@ void RenderIt(int skip){
 	vp.ID(viewportID);
 	vp.Render3D(cameraID, TRUE, TRUE);
 
-	//get camera's data
-	FnCamera camera;
-	camera.ID(cameraID);
 
-//	camera.GetPosition(pos);
-//	camera.GetDirection(fDir, uDir);
-//	camera.SetDirection(fDir, uDir);
-//	pos[1] -= 400;
-//	pos[2] += 40;
-//	camera.SetPosition(pos);
+
 
 	//show frame rate
 	static char string[128];
@@ -220,15 +196,42 @@ void RenderIt(int skip){
 	text.Begin(viewportID);
 	text.Write(string, 20, 20, 255, 0, 0);
 
+	//get camera's data
+	camera.getCamera().GetPosition(pos);
+	camera.getCamera().GetDirection(fDir, uDir);
+
 	char posS[256], fDirS[256], uDirS[256];
 	sprintf_s(posS, "pos: %8.3f %8.3f %8.3f", pos[0], pos[1], pos[2]);
 	sprintf_s(fDirS, "facing: %8.3f %8.3f %8.3f", fDir[0], fDir[1], fDir[2]);
 	sprintf_s(uDirS, "up: %8.3f %8.3f %8.3f", uDir[0], uDir[1], uDir[2]);
 
-   text.Write(posS, 20, 35, 255, 255, 0);
-   text.Write(fDirS, 20, 50, 255, 255, 0);
-   text.Write(uDirS, 20, 65, 255, 255, 0);
+    text.Write(posS, 20, 35, 255, 255, 0);
+    text.Write(fDirS, 20, 50, 255, 255, 0);
+    text.Write(uDirS, 20, 65, 255, 255, 0);
 
+	//get camera base's data
+	camera.getCameraBase().GetPosition(pos);
+	camera.getCameraBase().GetDirection(fDir, uDir);
+	sprintf_s(posS, "pos: %8.3f %8.3f %8.3f", pos[0], pos[1], pos[2]);
+	sprintf_s(fDirS, "facing: %8.3f %8.3f %8.3f", fDir[0], fDir[1], fDir[2]);
+	sprintf_s(uDirS, "up: %8.3f %8.3f %8.3f", uDir[0], uDir[1], uDir[2]);
+    
+	text.Write(posS, 20, 80, 255, 255, 0);
+    text.Write(fDirS, 20, 95, 255, 255, 0);
+    text.Write(uDirS, 20, 110, 255, 255, 0);
+
+	FnCharacter actor;
+	actor.ID(actorID);
+	//get actor's data
+	actor.GetPosition(pos);
+	actor.GetDirection(fDir, uDir);
+	sprintf_s(posS, "pos: %8.3f %8.3f %8.3f", pos[0], pos[1], pos[2]);
+	sprintf_s(fDirS, "facing: %8.3f %8.3f %8.3f", fDir[0], fDir[1], fDir[2]);
+	sprintf_s(uDirS, "up: %8.3f %8.3f %8.3f", uDir[0], uDir[1], uDir[2]);
+    
+	text.Write(posS, 20, 125, 255, 255, 0);
+    text.Write(fDirS, 20, 140, 255, 255, 0);
+    text.Write(uDirS, 20, 155, 255, 255, 0);
    text.End();
 
    FySwapBuffers();

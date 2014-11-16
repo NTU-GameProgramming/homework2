@@ -1,9 +1,15 @@
 #include "Camera.h"
 
-Camera::Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character) {
+Camera::Camera(void) {
+}
+Camera::~Camera(void) {
+}
+
+void Camera::initialize(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character) {
+	this->character = character;
+	this->char_ctrl = character->getController();
 	this->scene_id = scene_id;
 	this->terrian_room_id = terrian_room_id;
-	this->character = character;
 	
 	FnScene scene(scene_id);
 	camera_base_id = scene.CreateObject(OBJECT);
@@ -16,13 +22,36 @@ Camera::Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character
 	camera.SetFarPlane(100000.0f);
 	camera.SetParent(camera_base_id);
 
-	cam_disp[0] = 500.0f; cam_disp[1] = 10.0f;
-   
+	cam_disp_polar[0] = 500.0f; cam_disp_polar[1] = 10.0f;
+	cam_disp_cart[0] = cam_disp_polar[0] * cos(cam_disp_polar[1] * M_PI / 180.0);
+	cam_disp_cart[1] = cam_disp_polar[0] * sin(cam_disp_polar[1] * M_PI / 180.0);
    //room.AddObject(cameraBaseID); // add to room
 }
-//int action, OBJECTid tID, OBJECTid cID, OBJECTid dummyID, OBJECTid actorID, float actor_height, float *cam_disp, BOOL4 *hit_test
 
-Camera::~Camera(void) {
+void Camera::resetCamera() {
+	float pos[3], fDir[3], uDir[3];
+
+	// set camera_base position and direction
+	char_ctrl->GetPosition(pos);
+	pos[2] = character->getCharacterHeight();
+
+	char_ctrl->GetDirection(fDir, NULL);
+	fDir[2] = 0.0f; // force to set to projection on horizontal plane
+	uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
+	
+	camera_base.SetPosition(pos);
+	camera_base.SetDirection(fDir, uDir);
+
+	// move to displaced position
+	camera_base.MoveForward(-cam_disp_cart[0]);
+
+	float pos_camera[3];
+	camera_base.GetPosition(pos_camera);
+	pos_camera[2] = pos[2] + cam_disp_cart[1];
+	fDir[0] = pos[0] - pos_camera[0]; fDir[1] = pos[1] - pos_camera[1]; fDir[2] = pos[2] - pos_camera[2];
+	camera.SetPosition(pos_camera);
+	camera.SetDirection(NULL, uDir);
+	camera.SetDirection(fDir, NULL);
 }
 
 void Camera::GameAIupdate(int skip) {

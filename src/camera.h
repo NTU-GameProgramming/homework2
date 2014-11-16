@@ -6,12 +6,13 @@
 
 class Camera {
 	public:
-		Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character);
-
+		Camera(void);
 		~Camera(void);
 
-		void GameAIupdate(int skip);
+		void initialize(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character);
 
+		void GameAIupdate(int skip);
+		void resetCamera(void);
 		OBJECTid getCameraId(){
 			return camera_id;
 		}
@@ -20,13 +21,26 @@ class Camera {
 			return camera_base_id;
 		}
 
+		FnCamera& getCamera() {
+			return camera;
+		}
+
+		FnObject& getCameraBase() {
+			return camera_base;
+		}
+
 	private:
+		
 		SCENEid scene_id;
 		OBJECTid camera_id, camera_base_id;
 		ROOMid terrian_room_id;
+		
 		FnCamera camera;
 		FnObject camera_base;
 		Character *character;
-		float cam_disp[2]; // displacement radius and lifted angle in degree
-}
+		FnCharacter *char_ctrl;
+
+		float cam_disp_polar[2]; // displacement radius and lifted angle in degree
+		float cam_disp_cart[2];  // displacement in cartesian
+};
 

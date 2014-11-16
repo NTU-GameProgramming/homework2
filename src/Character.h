@@ -142,12 +142,24 @@ public:
 	
 	int update(int skip); //在gameAI時，更新人物動作 return 是否碰撞
 
+	void setBaseCameraId(OBJECTid baseCameraId) {
+		this->m_dummyCameraId = baseCameraId;
+	}
+
 	CHARACTERid getCharacterId(){
 		return m_actorId;
 	}
 
 	MotionState getCurrentState() {
 		return m_curState;
+	}
+
+	float getCharacterHeight() {
+		return character_height;
+	}
+
+	FnCharacter* getController() {
+		return &m_actor;
 	}
 
 	int collision; //人物是否碰撞中
@@ -176,5 +188,8 @@ private:
 	std::map<MotionState, ACTIONid> m_mapState2Action;
 	std::map<ACTIONid, std::string> m_mapAction2Name;
 	std::map<ActionType, ACTIONid> m_mapIndex2Action;
+
+	//character info
+	float character_height;
 };
 
