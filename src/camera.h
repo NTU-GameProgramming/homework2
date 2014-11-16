@@ -1,6 +1,26 @@
 #include "FlyWin32.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+
+class Camera : Object {
+	public:
+		Camera(void);
+
+		!Camera(void);
+
+		void initialize(actorID,sceneId,terrianRoomId);
+
+		void GameAIupdate(int skip);
+
+		Cameraid getCameraId(){
+			return cameraId;
+		}
+
+	private:
+		everyID..... ;
+}
+
 // camera
 // [action]
 // 0 : do nothing
