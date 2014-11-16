@@ -104,8 +104,6 @@ void FyMain(int argc, char **argv)
    cameraBase.SetPosition(pos);
    cameraBase.SetDirection(fDir, uDir);
 
-   actor.initialize(sceneID, cameraBaseID, terrainRoomID);
-   actorID = actor.getCharacterId();
 
    // translate the camera, [0] = radius, [1] = angle in degree
    cam_disp[0] = 500.0f; cam_disp[1] = 10.0f;
@@ -124,19 +122,20 @@ void FyMain(int argc, char **argv)
    fDir[0] = 1.0f; fDir[1] = 0.0f; fDir[2] = 0.0f;
    uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
 
-   FnObject dummyObj;
-   dummyObj.ID(cameraBaseID);
-   dummyObj.SetPosition(pos);
-   dummyObj.SetDirection(fDir, uDir);
-   
+
+   actor.initialize(sceneID, cameraID, terrainRoomID);
+   actorID = actor.getCharacterId();
+   actor_height = 100.0f;
+
    // setup a point light
+   /*
    FnLight light;
    lightID = scene.CreateObject(LIGHT);
    light.ID(lightID);
    light.Translate(70.0f, -70.0f, 70.0f, REPLACE);
    light.SetColor(1.0f, 1.0f, 1.0f);
    light.SetIntensity(1.0f);
-
+   */
    //create a text object for display message on screen
    textID = FyCreateText("Trebuchet MS", 18, FALSE, FALSE);
 
@@ -169,7 +168,7 @@ void FyMain(int argc, char **argv)
  --------------------------------------------------------------*/
 void GameAI(int skip)
 {
-
+   
 
    moveCamera(1, terrainID, cameraID, cameraBaseID, actorID, actor_height, cam_disp, &hit_test);
    actor.update(skip);
