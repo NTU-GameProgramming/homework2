@@ -33,10 +33,11 @@ class Camera {
 		
 		SCENEid scene_id;
 		OBJECTid camera_id, camera_base_id;
-		ROOMid terrian_room_id;
+		ROOMid terrian_id;
+		
 		
 		FnCamera camera;
-		FnObject camera_base;
+		FnObject camera_base, terrian;
 		Character *character;
 		FnCharacter *char_ctrl;
 

@@ -14,7 +14,7 @@ Character::~Character(void)
 
 void Character::initialize(const SCENEid &sceneId, const OBJECTid &dummyCameraId, const ROOMid &terrianRoomId){ 
 	// Since character size seems to be invisible from users, we had to set it ourselves.
-	character_height = 100.0f;
+	character_height = 120.0f;
 
 	m_sceneId = sceneId;
 	m_dummyCameraId = dummyCameraId;

@@ -103,7 +103,7 @@ void FyMain(int argc, char **argv)
 	actorID = actor.getCharacterId();
 
 	//初始化攝影機
-	camera.initialize(sceneID, terrainRoomID, &actor);
+	camera.initialize(sceneID, terrainID, &actor);
 	cameraID = camera.getCameraId();
 	cameraBaseID = camera.getCameraBaseId();
 

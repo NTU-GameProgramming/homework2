@@ -5,11 +5,11 @@ Camera::Camera(void) {
 Camera::~Camera(void) {
 }
 
-void Camera::initialize(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character) {
+void Camera::initialize(const SCENEid &scene_id, const ROOMid &terrian_id, Character *character) {
 	this->character = character;
 	this->char_ctrl = character->getController();
 	this->scene_id = scene_id;
-	this->terrian_room_id = terrian_room_id;
+	this->terrian_id = terrian_id;
 	
 	FnScene scene(scene_id);
 	camera_base_id = scene.CreateObject(OBJECT);
@@ -24,10 +24,11 @@ void Camera::initialize(const SCENEid &scene_id, const ROOMid &terrian_room_id, 
 
 
 
-	cam_disp_polar[0] = 500.0f; cam_disp_polar[1] = 10.0f;
+	cam_disp_polar[0] = 700.0f; cam_disp_polar[1] = 10.0f;
 	cam_disp_cart[0] = cam_disp_polar[0] * cos(cam_disp_polar[1] * M_PI / 180.0);
 	cam_disp_cart[1] = cam_disp_polar[0] * sin(cam_disp_polar[1] * M_PI / 180.0);
-   //room.AddObject(cameraBaseID); // add to room
+
+   	terrian.ID(terrian_id);
 }
 
 void Camera::resetCamera() {
@@ -65,7 +66,7 @@ void Camera::GameAIupdate(int skip) {
 	float pos_char[3], pos_camera[3], pos_camerabase[3], fDir[3], uDir[3];
 	MotionState ms = character->getCurrentState();
 
-
+	bool rotation = false;
 	
 	switch(ms) {
 		// if character is moving in left/right
@@ -78,7 +79,7 @@ void Camera::GameAIupdate(int skip) {
 			char_old_fDir[1] = fDir[1];
 			char_old_fDir[2] = 0;
 			camera_base.SetDirection(fDir, NULL);
-			
+			rotation = true;
 			break;
 		
 		// if character is moving other than left/right
@@ -93,8 +94,31 @@ void Camera::GameAIupdate(int skip) {
 			pos_char[2] = character->getCharacterHeight();
 			camera_base.SetPosition(pos_char);
 			camera_base.SetDirection(char_old_fDir, NULL);
+
+			// 再做碰撞偵測
+			float ray[3];
+			float cam_hor_disp, cam_ver_disp, angle;
+			angle = cam_disp_polar[1];
+			while(true) {
+				cam_hor_disp = cam_disp_polar[0] * cos(angle * M_PI / 180.0);
+				cam_ver_disp = cam_disp_polar[0] * sin(angle * M_PI / 180.0);
+				pos_camerabase[0] = pos_char[0] - char_old_fDir[0] * cam_hor_disp;
+				pos_camerabase[1] = pos_char[1] - char_old_fDir[1] * cam_hor_disp;
+				pos_camerabase[2] = pos_char[2];
+				ray[0] =  0.0f;		ray[1] =  0.0f;		ray[2] = -1.0f;
+				
+				if(terrian.HitTest(pos_camerabase, ray) > 0 || angle >= 90.0f)  { 
+					break;
+				} else {
+					// no hit, need to tune the camera
+					angle += 2.0f;
+				}
+			} 
 			// move to displaced position
-			camera_base.MoveForward(-cam_disp_cart[0]);
+			camera_base.MoveForward(-cam_hor_disp);
+			camera_base.GetPosition(pos_camera);
+			pos_camera[2] += cam_ver_disp;
+			camera.SetPosition(pos_camera);
 			break;
 		case MotionState::IDLE:
 		default:
@@ -104,41 +128,16 @@ void Camera::GameAIupdate(int skip) {
 	}
 
 	// 決定Camera的fDir
+	
 	uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
 
-	char_ctrl->GetPosition(pos_char);
-	camera_base.GetPosition(pos_camerabase);
-	pos_camera[0] = pos_camerabase[0];
-	pos_camera[1] = pos_camerabase[1];
-	pos_camera[2] = pos_camerabase[2] + cam_disp_cart[1];
-	
+	char_ctrl->GetPosition(pos_char); pos_char[2] = character->getCharacterHeight();
+	camera.GetPosition(pos_camera);
 	fDir[0] = pos_char[0] - pos_camera[0]; fDir[1] = pos_char[1] - pos_camera[1]; fDir[2] = pos_char[2] - pos_camera[2];
-	
-	camera.SetPosition(pos_camera);
+
 	camera.SetDirection(NULL, uDir);
 	camera.SetDirection(fDir, NULL);
-	// 再做碰撞偵測
-/*		float pos_tmp[3], ray[3];
-		float cam_hor_disp, cam_ver_disp, angle;
-		*hit_test = TRUE;
-		angle = cam_disp[1];
-		while(true) {
-			cam_hor_disp = cam_disp[0] * cos(angle * M_PI / 180.0);
-			cam_ver_disp = cam_disp[0] * sin(angle * M_PI / 180.0);
-			pos_tmp[0] = pos[0] + fDir[0] * cam_hor_disp;
-			pos_tmp[1] = pos[1] + fDir[1] * cam_hor_disp;
-			pos_tmp[2] = pos[2];
-			ray[0] =  0.0f;		ray[1] =  0.0f;		ray[2] = -1.0f;
-			
-			if(terrian.HitTest(pos_tmp, ray) > 0 || angle >= 90.0f)  { 
-				break;
-			} else {
-			// no hit, need to tune the camera
-				angle += 2.0f;
-				*hit_test = FALSE;
-			}
-		} 
-		*/
+	
 }
 
 // camera
