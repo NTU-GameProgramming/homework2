@@ -42,5 +42,7 @@ class Camera {
 
 		float cam_disp_polar[2]; // displacement radius and lifted angle in degree
 		float cam_disp_cart[2];  // displacement in cartesian
+
+		float char_fDir[3];		 // it is needed to record the old face direction of character
 };
 

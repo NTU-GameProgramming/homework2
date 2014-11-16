@@ -107,8 +107,8 @@ void FyMain(int argc, char **argv)
 	cameraID = camera.getCameraId();
 	cameraBaseID = camera.getCameraBaseId();
 
-	//重設人物的cameraID
-	actor.setBaseCameraId(cameraID);
+	//重設人物的cameraBaseID
+	actor.setBaseCameraId(cameraBaseID);
 
 	//放好相機
 	camera.resetCamera();
@@ -157,7 +157,7 @@ void GameAI(int skip)
 {
     actor.update(skip);  //人物狀態的更新
    //Camera狀態的更新
-	camera.resetCamera();
+	camera.GameAIupdate(skip);
 }
 
 void RenderIt(int skip){

@@ -49,20 +49,22 @@ void Camera::resetCamera() {
 	camera_base.GetPosition(pos_camera);
 	pos_camera[2] = pos[2] + cam_disp_cart[1];
 	fDir[0] = pos[0] - pos_camera[0]; fDir[1] = pos[1] - pos_camera[1]; fDir[2] = pos[2] - pos_camera[2];
-	camera.SetPosition(pos_camera);
 	camera.SetDirection(NULL, uDir);
 	camera.SetDirection(fDir, NULL);
+	camera.SetPosition(pos_camera);
 }
 
 void Camera::GameAIupdate(int skip) {
+	float pos[3], fDir[3], uDir[3];
 	MotionState ms = character->getCurrentState();
+
 
 	
 	switch(ms) {
 		// if character is moving in left/right
 		case MotionState::MOVE_LEFT:
 		case MotionState::MOVE_RIGHT:
-
+			camera_base.GetPosition(pos);
 			break;
 		
 		// if character is moving other than left/right
@@ -72,16 +74,50 @@ void Camera::GameAIupdate(int skip) {
 		case MotionState::MOVE_RIGHT_BACKWARD:
 		case MotionState::MOVE_LEFT_FORWARD:
 		case MotionState::MOVE_RIGHT_FORWARD:
-			
+			//先決定BaseCamera的位置
+			char_ctrl->GetPosition(pos);
+			pos[2] = character->getCharacterHeight();
+			camera_base.SetPosition(pos);
+			camera_base.SetDirection(fDir, NULL);
+			// move to displaced position
+			camera_base.MoveForward(-cam_disp_cart[0]);
 			break;
-
+		case MotionState::IDLE:
 		default:
+			return;
 			break;
+			
 	}
-
-
-	
-
+	uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
+	float pos_camera[3];
+	camera_base.GetPosition(pos_camera);
+	pos_camera[2] = pos[2] + cam_disp_cart[1];
+	fDir[0] = pos[0] - pos_camera[0]; fDir[1] = pos[1] - pos_camera[1]; fDir[2] = pos[2] - pos_camera[2];
+	camera.SetPosition(pos_camera);
+	camera.SetDirection(NULL, uDir);
+	camera.SetDirection(fDir, NULL);
+	// 再做碰撞偵測
+/*		float pos_tmp[3], ray[3];
+		float cam_hor_disp, cam_ver_disp, angle;
+		*hit_test = TRUE;
+		angle = cam_disp[1];
+		while(true) {
+			cam_hor_disp = cam_disp[0] * cos(angle * M_PI / 180.0);
+			cam_ver_disp = cam_disp[0] * sin(angle * M_PI / 180.0);
+			pos_tmp[0] = pos[0] + fDir[0] * cam_hor_disp;
+			pos_tmp[1] = pos[1] + fDir[1] * cam_hor_disp;
+			pos_tmp[2] = pos[2];
+			ray[0] =  0.0f;		ray[1] =  0.0f;		ray[2] = -1.0f;
+			
+			if(terrian.HitTest(pos_tmp, ray) > 0 || angle >= 90.0f)  { 
+				break;
+			} else {
+			// no hit, need to tune the camera
+				angle += 2.0f;
+				*hit_test = FALSE;
+			}
+		} 
+		*/
 }
 
 // camera
