@@ -39,12 +39,15 @@ void Camera::resetCamera() {
 
 	char_ctrl->GetDirection(fDir, NULL);
 	fDir[2] = 0.0f; // force to set to projection on horizontal plane
+	char_old_fDir[0] = fDir[0];	char_old_fDir[1] = fDir[1];	char_old_fDir[2] = fDir[2];
+
 	uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
 	
 	camera_base.SetPosition(pos);
-	camera_base.SetDirection(fDir, uDir);
-
+	camera_base.SetDirection(NULL, uDir);
+	camera_base.SetDirection(fDir, NULL);
 	camera.SetDirection(fDir, uDir);
+	
 
 	// move to displaced position
 	camera_base.MoveForward(-cam_disp_cart[0]);
@@ -59,7 +62,7 @@ void Camera::resetCamera() {
 }
 
 void Camera::GameAIupdate(int skip) {
-	float pos[3], fDir[3], uDir[3];
+	float pos_char[3], pos_camera[3], pos_camerabase[3], fDir[3], uDir[3];
 	MotionState ms = character->getCurrentState();
 
 
@@ -68,7 +71,14 @@ void Camera::GameAIupdate(int skip) {
 		// if character is moving in left/right
 		case MotionState::MOVE_LEFT:
 		case MotionState::MOVE_RIGHT:
-			camera_base.GetPosition(pos);
+			char_ctrl->GetPosition(pos_char);
+			camera_base.GetPosition(pos_camerabase);
+			fDir[0] = pos_char[0] - pos_camerabase[0];fDir[1] = pos_char[1] - pos_camerabase[1];fDir[2]=0.0f;
+			char_old_fDir[0] = fDir[0];
+			char_old_fDir[1] = fDir[1];
+			char_old_fDir[2] = 0;
+			camera_base.SetDirection(fDir, NULL);
+			
 			break;
 		
 		// if character is moving other than left/right
@@ -78,11 +88,11 @@ void Camera::GameAIupdate(int skip) {
 		case MotionState::MOVE_RIGHT_BACKWARD:
 		case MotionState::MOVE_LEFT_FORWARD:
 		case MotionState::MOVE_RIGHT_FORWARD:
-			//先決定BaseCamera的位置
-			char_ctrl->GetPosition(pos);
-			pos[2] = character->getCharacterHeight();
-			camera_base.SetPosition(pos);
-			camera_base.SetDirection(fDir, NULL);
+			//先決定BaseCamera的位置，但是位移方向使用舊的
+			char_ctrl->GetPosition(pos_char);
+			pos_char[2] = character->getCharacterHeight();
+			camera_base.SetPosition(pos_char);
+			camera_base.SetDirection(char_old_fDir, NULL);
 			// move to displaced position
 			camera_base.MoveForward(-cam_disp_cart[0]);
 			break;
@@ -92,11 +102,18 @@ void Camera::GameAIupdate(int skip) {
 			break;
 			
 	}
+
+	// 決定Camera的fDir
 	uDir[0] = 0.0f; uDir[1] = 0.0f; uDir[2] = 1.0f;
-	float pos_camera[3];
-	camera_base.GetPosition(pos_camera);
-	pos_camera[2] = pos[2] + cam_disp_cart[1];
-	fDir[0] = pos[0] - pos_camera[0]; fDir[1] = pos[1] - pos_camera[1]; fDir[2] = pos[2] - pos_camera[2];
+
+	char_ctrl->GetPosition(pos_char);
+	camera_base.GetPosition(pos_camerabase);
+	pos_camera[0] = pos_camerabase[0];
+	pos_camera[1] = pos_camerabase[1];
+	pos_camera[2] = pos_camerabase[2] + cam_disp_cart[1];
+	
+	fDir[0] = pos_char[0] - pos_camera[0]; fDir[1] = pos_char[1] - pos_camera[1]; fDir[2] = pos_char[2] - pos_camera[2];
+	
 	camera.SetPosition(pos_camera);
 	camera.SetDirection(NULL, uDir);
 	camera.SetDirection(fDir, NULL);

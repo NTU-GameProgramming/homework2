@@ -155,9 +155,9 @@ void FyMain(int argc, char **argv)
  --------------------------------------------------------------*/
 void GameAI(int skip)
 {
-    //actor.update(skip);  //人物狀態的更新
+    actor.update(skip);  //人物狀態的更新
    //Camera狀態的更新
-	//camera.GameAIupdate(skip);
+	camera.GameAIupdate(skip);
 	//camera.resetCamera();
 }
 
