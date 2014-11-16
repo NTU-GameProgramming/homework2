@@ -145,6 +145,11 @@ public:
 	CHARACTERid getCharacterId(){
 		return m_actorId;
 	}
+
+	MotionState getCurrentState() {
+		return m_curState;
+	}
+
 	int collision; //人物是否碰撞中
 private:
 	float getNewRotateAngle();
