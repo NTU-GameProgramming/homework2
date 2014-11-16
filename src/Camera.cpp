@@ -1,9 +1,10 @@
 #include "Camera.h"
 
-Camera::Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id) {
+Camera::Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character) {
 	this->scene_id = scene_id;
 	this->terrian_room_id = terrian_room_id;
-
+	this->character = character;
+	
 	FnScene scene(scene_id);
 	camera_base_id = scene.CreateObject(OBJECT);
 	camera_base.ID(camera_base_id);
@@ -25,7 +26,32 @@ Camera::~Camera(void) {
 }
 
 void Camera::GameAIupdate(int skip) {
-	// if only 
+	MotionState ms = character->getCurrentState();
+
+	
+	switch(ms) {
+		// if character is moving in left/right
+		case MotionState::MOVE_LEFT:
+		case MotionState::MOVE_RIGHT:
+
+			break;
+		
+		// if character is moving other than left/right
+		case MotionState::MOVE_BACKWARD:
+		case MotionState::MOVE_FORWARD:
+		case MotionState::MOVE_LEFT_BACKWARD:
+		case MotionState::MOVE_RIGHT_BACKWARD:
+		case MotionState::MOVE_LEFT_FORWARD:
+		case MotionState::MOVE_RIGHT_FORWARD:
+			
+			break;
+
+		default:
+			break;
+	}
+
+
+	
 
 }
 

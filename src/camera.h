@@ -1,11 +1,12 @@
+#pragma once
 #include "FlyWin32.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include "Character.h"
 
 class Camera {
 	public:
-		Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id);
+		Camera(const SCENEid &scene_id, const ROOMid &terrian_room_id, Character *character);
 
 		~Camera(void);
 
@@ -25,6 +26,7 @@ class Camera {
 		ROOMid terrian_room_id;
 		FnCamera camera;
 		FnObject camera_base;
+		Character *character;
 		float cam_disp[2]; // displacement radius and lifted angle in degree
 }
 
